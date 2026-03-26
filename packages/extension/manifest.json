@@ -1,0 +1,47 @@
+{
+  "manifest_version": 3,
+  "name": "WebPin — 网页批注工具",
+  "version": "1.0.0",
+  "description": "对任意网页添加批注和反馈，支持多人协作",
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "action": {
+    "default_popup": "ui/popup.html",
+    "default_title": "WebPin"
+  },
+  "permissions": [
+    "storage",
+    "tabs",
+    "activeTab",
+    "scripting"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "background": {
+    "service_worker": "background/service-worker.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": [
+        "content/dom-mapper.js",
+        "content/api-client.js",
+        "content/overlay.js",
+        "content/injector.js"
+      ],
+      "css": [],
+      "run_at": "document_idle",
+      "all_frames": false
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["styles/annotation.css"],
+      "matches": ["<all_urls>"]
+    }
+  ]
+}

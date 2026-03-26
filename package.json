@@ -1,0 +1,14 @@
+{
+  "name": "webpin",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "packages/backend",
+    "packages/sdk"
+  ],
+  "scripts": {
+    "dev:backend": "pnpm --filter backend dev",
+    "dev:sdk": "pnpm --filter sdk dev",
+    "build:sdk": "pnpm --filter sdk build"
+  }
+}

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>WebPin SDK 测试页面</title>
+  <style>
+    body { font-family: -apple-system, sans-serif; max-width: 800px; margin: 40px auto; padding: 0 20px; color: #333; }
+    h1 { color: #FF6B35; }
+    .card { background: #f9f9f9; border-radius: 12px; padding: 20px; margin: 20px 0; }
+    .card h2 { margin: 0 0 10px; }
+    .card p { line-height: 1.6; color: #555; }
+    .feature-list li { margin: 8px 0; }
+    button { background: #FF6B35; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-size: 14px; }
+    button:hover { background: #E64E1C; }
+    .code-block { background: #1a1a1a; color: #e8e8e8; border-radius: 8px; padding: 16px; font-family: monospace; font-size: 13px; overflow-x: auto; }
+  </style>
+</head>
+<body>
+  <h1>WebPin — 网页批注工具</h1>
+  <p>这是一个 SDK 嵌入演示页面。右下角的 ✏️ 按钮可激活批注模式，点击页面上任意元素即可添加批注。</p>
+
+  <div class="card" id="card-intro">
+    <h2>功能介绍</h2>
+    <p>WebPin 是一个类似 markup.io 的网页批注工具，支持：</p>
+    <ul class="feature-list">
+      <li>✏️ 点选任意页面元素添加批注</li>
+      <li>👤 记录批注人信息（姓名、时间）</li>
+      <li>💬 回复和讨论线程</li>
+      <li>✅ 标记批注为已解决</li>
+      <li>🎨 彩色批注标记</li>
+    </ul>
+  </div>
+
+  <div class="card" id="card-install">
+    <h2>SDK 安装方法</h2>
+    <p>在你的网页 <code>&lt;body&gt;</code> 末尾添加：</p>
+    <div class="code-block">
+&lt;script
+  src="https://your-domain.com/embed.js"
+  data-project-id="YOUR_PROJECT_ID"
+  data-api-key="YOUR_API_KEY"
+&gt;&lt;/script&gt;
+    </div>
+  </div>
+
+  <div class="card" id="card-extension">
+    <h2>Chrome 扩展安装</h2>
+    <p>通过 Chrome 扩展，你可以对任意网页（包括不是你自己的网站）添加批注，适合设计评审、网页反馈等场景。</p>
+    <button onclick="alert('加载 packages/extension 文件夹到 Chrome 扩展管理页')">了解安装方法</button>
+  </div>
+
+  <!-- 引入 WebPin SDK (开发模式，直接用源文件) -->
+  <!-- 生产环境用 dist/embed.js -->
+  <script>
+    // 模拟 SDK 初始化（开发测试用）
+    window.addEventListener('DOMContentLoaded', () => {
+      console.log('[WebPin Test] 页面加载完成');
+      console.log('[WebPin Test] 请运行 pnpm build:sdk 后刷新，或直接加载 Chrome 扩展测试');
+    });
+  </script>
+
+  <!-- 生产环境取消注释以下代码 -->
+  <!--
+  <script
+    src="./packages/sdk/dist/embed.js"
+    data-project-id="YOUR_PROJECT_ID"
+    data-api-key="YOUR_API_KEY"
+    data-api-base="http://localhost:3001/api/v1"
+  ></script>
+  -->
+</body>
+</html>

@@ -1,0 +1,5 @@
+node_modules/
+.env
+packages/*/node_modules/
+packages/sdk/dist/
+*.log

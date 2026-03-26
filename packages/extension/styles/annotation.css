@@ -1,0 +1,542 @@
+/* WebPin 批注样式 — 在 Shadow DOM 内使用，不会污染宿主页面 */
+
+:host {
+  all: initial;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 14px;
+  color: #1a1a1a;
+  line-height: 1.5;
+  box-sizing: border-box;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+/* ===== 悬停高亮 ===== */
+.webpin-highlight {
+  outline: 2px solid #FF6B35 !important;
+  outline-offset: 2px !important;
+  cursor: crosshair !important;
+  background-color: rgba(255, 107, 53, 0.06) !important;
+}
+
+/* ===== 点击选中后（气泡打开期间）===== */
+.webpin-selected {
+  outline: 2px dashed #FF6B35 !important;
+  outline-offset: 3px !important;
+  background-color: rgba(255, 107, 53, 0.08) !important;
+}
+
+/* ===== 批注内容标签（显示在被标注元素下方）===== */
+.webpin-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 6px;
+  padding: 4px 10px;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+  z-index: 2147483640;
+  max-width: 260px;
+  white-space: nowrap;
+  overflow: hidden;
+  transition: box-shadow 0.15s, transform 0.15s;
+  border: 1.5px solid rgba(0,0,0,0.08);
+}
+
+.webpin-label:hover {
+  box-shadow: 0 4px 14px rgba(0,0,0,0.25);
+  transform: translateY(-1px);
+}
+
+.webpin-label.resolved {
+  background: #e0e0e0 !important;
+  border-color: #bbb !important;
+  color: #888;
+}
+
+.webpin-label.resolved .webpin-label-author,
+.webpin-label.resolved .webpin-label-text {
+  color: #888;
+  text-decoration: line-through;
+}
+
+.webpin-label-author {
+  font-size: 11px;
+  font-weight: 700;
+  color: rgba(0,0,0,0.6);
+  flex-shrink: 0;
+}
+
+.webpin-label-author::after {
+  content: ':';
+}
+
+.webpin-label-text {
+  font-size: 12px;
+  color: rgba(0,0,0,0.75);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 保留 .webpin-pin 以防旧代码引用 */
+.webpin-pin { display: none; }
+
+/* ===== 批注输入气泡 ===== */
+.webpin-bubble {
+  position: absolute;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.18), 0 2px 8px rgba(0,0,0,0.1);
+  width: 300px;
+  padding: 0;
+  z-index: 2147483641;
+  overflow: hidden;
+  animation: webpin-fade-in 0.15s ease;
+}
+
+@keyframes webpin-fade-in {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.webpin-bubble-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 14px 8px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.webpin-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 12px;
+  font-weight: 600;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.webpin-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.webpin-author-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.webpin-bubble textarea {
+  width: 100%;
+  border: none;
+  outline: none;
+  resize: none;
+  padding: 10px 14px;
+  font-size: 14px;
+  font-family: inherit;
+  min-height: 72px;
+  color: #333;
+  background: transparent;
+}
+
+.webpin-bubble textarea::placeholder {
+  color: #aaa;
+}
+
+.webpin-bubble-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 14px 12px;
+  border-top: 1px solid #f0f0f0;
+}
+
+/* 颜色选择器 */
+.webpin-colors {
+  display: flex;
+  gap: 6px;
+}
+
+.webpin-color-dot {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: border-color 0.1s, transform 0.1s;
+}
+
+.webpin-color-dot:hover,
+.webpin-color-dot.active {
+  border-color: rgba(0,0,0,0.4);
+  transform: scale(1.2);
+}
+
+.webpin-bubble-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.webpin-btn {
+  padding: 6px 14px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  transition: background 0.1s;
+}
+
+.webpin-btn-cancel {
+  background: #f5f5f5;
+  color: #666;
+}
+
+.webpin-btn-cancel:hover {
+  background: #ebebeb;
+}
+
+.webpin-btn-submit {
+  background: #FF6B35;
+  color: white;
+}
+
+.webpin-btn-submit:hover {
+  background: #E64E1C;
+}
+
+.webpin-btn-submit:disabled {
+  background: #ffb09a;
+  cursor: not-allowed;
+}
+
+/* ===== 侧边栏 ===== */
+.webpin-sidebar {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 340px;
+  height: 100vh;
+  background: white;
+  box-shadow: -4px 0 20px rgba(0,0,0,0.12);
+  z-index: 2147483645;
+  display: flex;
+  flex-direction: column;
+  transform: translateX(0);
+  transition: transform 0.25s ease;
+}
+
+.webpin-sidebar.hidden {
+  transform: translateX(100%);
+}
+
+.webpin-sidebar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 16px 12px;
+  border-bottom: 1px solid #f0f0f0;
+  flex-shrink: 0;
+}
+
+.webpin-sidebar-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #1a1a1a;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.webpin-logo {
+  width: 20px;
+  height: 20px;
+  background: #FF6B35;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.webpin-badge {
+  background: #FF6B35;
+  color: white;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 10px;
+}
+
+.webpin-close-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #999;
+  font-size: 18px;
+  line-height: 1;
+  padding: 4px;
+  border-radius: 4px;
+}
+
+.webpin-close-btn:hover {
+  background: #f5f5f5;
+  color: #666;
+}
+
+.webpin-sidebar-filters {
+  display: flex;
+  gap: 4px;
+  padding: 10px 12px;
+  border-bottom: 1px solid #f0f0f0;
+  flex-shrink: 0;
+}
+
+.webpin-filter-btn {
+  padding: 5px 12px;
+  border: 1px solid #e5e5e5;
+  border-radius: 20px;
+  background: white;
+  cursor: pointer;
+  font-size: 12px;
+  color: #666;
+  transition: all 0.1s;
+}
+
+.webpin-filter-btn.active {
+  background: #FF6B35;
+  border-color: #FF6B35;
+  color: white;
+}
+
+.webpin-annotations-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px 0;
+}
+
+.webpin-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  color: #bbb;
+  font-size: 14px;
+  gap: 8px;
+}
+
+.webpin-empty-icon {
+  font-size: 36px;
+  opacity: 0.4;
+}
+
+/* ===== 批注卡片 ===== */
+.webpin-card {
+  padding: 12px 16px;
+  border-bottom: 1px solid #f5f5f5;
+  cursor: pointer;
+  transition: background 0.1s;
+}
+
+.webpin-card:hover {
+  background: #fafafa;
+}
+
+.webpin-card.active {
+  background: #fff5f1;
+  border-left: 3px solid #FF6B35;
+}
+
+.webpin-card.resolved {
+  opacity: 0.6;
+}
+
+.webpin-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.webpin-card-author {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.webpin-card-meta {
+  font-size: 12px;
+  color: #999;
+}
+
+.webpin-card-content {
+  font-size: 13px;
+  color: #333;
+  line-height: 1.5;
+  margin-bottom: 8px;
+  word-break: break-word;
+}
+
+.webpin-card-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.webpin-action-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 12px;
+  color: #999;
+  padding: 2px 6px;
+  border-radius: 4px;
+  transition: background 0.1s, color 0.1s;
+}
+
+.webpin-action-btn:hover {
+  background: #f0f0f0;
+  color: #555;
+}
+
+.webpin-action-btn.resolve {
+  color: #22c55e;
+}
+
+/* ===== 回复线程 ===== */
+.webpin-replies {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.webpin-reply {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.webpin-reply-content {
+  flex: 1;
+  background: #f8f8f8;
+  border-radius: 8px;
+  padding: 8px 10px;
+}
+
+.webpin-reply-author {
+  font-size: 12px;
+  font-weight: 600;
+  color: #555;
+  margin-bottom: 2px;
+}
+
+.webpin-reply-text {
+  font-size: 13px;
+  color: #333;
+}
+
+.webpin-reply-input-row {
+  display: flex;
+  gap: 8px;
+  align-items: flex-end;
+  margin-top: 6px;
+}
+
+.webpin-reply-input {
+  flex: 1;
+  border: 1px solid #e5e5e5;
+  border-radius: 8px;
+  padding: 7px 10px;
+  font-size: 13px;
+  font-family: inherit;
+  resize: none;
+  outline: none;
+  min-height: 34px;
+  max-height: 80px;
+  transition: border-color 0.1s;
+}
+
+.webpin-reply-input:focus {
+  border-color: #FF6B35;
+}
+
+.webpin-reply-submit {
+  background: #FF6B35;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 7px 12px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  flex-shrink: 0;
+}
+
+.webpin-reply-submit:hover {
+  background: #E64E1C;
+}
+
+/* ===== 激活模式工具栏 ===== */
+.webpin-toolbar {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #1a1a1a;
+  color: white;
+  border-radius: 28px;
+  padding: 10px 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  z-index: 2147483647;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  font-size: 13px;
+  animation: webpin-slide-up 0.2s ease;
+}
+
+@keyframes webpin-slide-up {
+  from { opacity: 0; transform: translateX(-50%) translateY(16px); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+.webpin-toolbar-dot {
+  width: 8px;
+  height: 8px;
+  background: #FF6B35;
+  border-radius: 50%;
+  animation: webpin-pulse 1.5s infinite;
+}
+
+@keyframes webpin-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+.webpin-toolbar-exit {
+  background: rgba(255,255,255,0.15);
+  border: none;
+  color: white;
+  border-radius: 16px;
+  padding: 4px 12px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.webpin-toolbar-exit:hover {
+  background: rgba(255,255,255,0.25);
+}
