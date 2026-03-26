@@ -3,7 +3,7 @@
  * 通过 chrome.storage 读取 token，与后端通信
  */
 
-const API_BASE = 'http://localhost:3001/api/v1';
+const API_BASE = 'https://webpin-backend.netlify.app/api/v1';
 
 class WebpinApiClient {
   constructor() {
