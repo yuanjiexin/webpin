@@ -1,6 +1,6 @@
 [build]
   base = "packages/backend"
-  command = "npm install && node src/migrate.js"
+  command = "npm install"
   functions = "netlify/functions"
   publish = "public"
 
