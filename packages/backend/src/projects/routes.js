@@ -26,16 +26,18 @@ router.post('/', authenticate, async (req, res) => {
   }
 });
 
-// GET /api/v1/projects — 获取当前用户的项目列表
+// GET /api/v1/projects — 获取所有项目列表
 router.get('/', authenticate, async (req, res) => {
   try {
     const result = await db.query(
       `SELECT p.id, p.name, p.description, p.api_key, p.created_at,
+              p.owner_id = $1 AS is_owner,
+              u.name AS owner_name,
               COUNT(a.id) FILTER (WHERE a.is_resolved = FALSE)::int AS open_annotation_count
        FROM projects p
        LEFT JOIN annotations a ON a.project_id = p.id
-       WHERE p.owner_id = $1
-       GROUP BY p.id
+       LEFT JOIN users u ON u.id = p.owner_id
+       GROUP BY p.id, u.name
        ORDER BY p.created_at DESC`,
       [req.user.id]
     );
@@ -50,8 +52,12 @@ router.get('/', authenticate, async (req, res) => {
 router.get('/:id', authenticate, async (req, res) => {
   try {
     const result = await db.query(
-      `SELECT id, name, description, api_key, created_at FROM projects
-       WHERE id = $1 AND owner_id = $2`,
+      `SELECT p.id, p.name, p.description, p.api_key, p.created_at,
+              p.owner_id = $2 AS is_owner,
+              u.name AS owner_name
+       FROM projects p
+       LEFT JOIN users u ON u.id = p.owner_id
+       WHERE p.id = $1`,
       [req.params.id, req.user.id]
     );
     if (result.rows.length === 0) {
