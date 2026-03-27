@@ -79,6 +79,7 @@ class WebpinOverlay {
     this._removeHighlight();
     this._closeBubble();
     this._hideToolbar();
+    this._clearVisuals();
   }
 
   /** 鼠标悬停时高亮元素 */
@@ -249,11 +250,9 @@ class WebpinOverlay {
     }
   }
 
-  /** 清除页面上所有批注标记 */
-  _clearPins() {
-    // 移除所有标签元素
+  /** 仅清除视觉标记（标签 + 元素框），保留数据 */
+  _clearVisuals() {
     this.root.querySelectorAll('.webpin-label').forEach(el => el.remove());
-    // 恢复所有被标记元素的样式
     this.annotations.forEach(a => {
       const { resolveXPath } = window.WebpinDomMapper;
       const targetEl = resolveXPath(a.selector_xpath) ||
@@ -264,6 +263,11 @@ class WebpinOverlay {
         targetEl._webpinMarked = null;
       }
     });
+  }
+
+  /** 清除页面上所有批注标记并清空数据 */
+  _clearPins() {
+    this._clearVisuals();
     this.annotations = [];
   }
 
@@ -301,8 +305,8 @@ class WebpinOverlay {
     }
     if (!rect) return;
 
-    // 给目标元素加虚线边框（直接作用于元素，清晰框选范围）
-    if (targetEl && !targetEl._webpinMarked) {
+    // 给目标元素加虚线边框（已解决的不显示，允许覆盖以保证每条批注都可见）
+    if (targetEl && !annotation.is_resolved) {
       targetEl._webpinMarked = annotation.id;
       targetEl.style.outline = `2px dashed ${color}`;
       targetEl.style.outlineOffset = '3px';
