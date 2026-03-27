@@ -285,7 +285,20 @@ class WebpinOverlay {
       (annotation.selector_css ? document.querySelector(annotation.selector_css) : null);
 
     const color = annotation.color || '#FFE082';
-    const rect = annotation.element_rect;
+
+    // 优先用当前用户页面中元素的实时位置，保证不同屏幕/缩放下位置一致
+    let rect;
+    if (targetEl) {
+      const liveRect = targetEl.getBoundingClientRect();
+      rect = {
+        top: liveRect.top + window.scrollY,
+        left: liveRect.left + window.scrollX,
+        width: liveRect.width,
+        height: liveRect.height,
+      };
+    } else {
+      rect = annotation.element_rect;
+    }
     if (!rect) return;
 
     // 给目标元素加虚线边框（直接作用于元素，清晰框选范围）
