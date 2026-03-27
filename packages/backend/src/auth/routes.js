@@ -9,6 +9,10 @@ const router = express.Router();
 
 // POST /api/v1/auth/register
 router.post('/register', async (req, res) => {
+  if (!process.env.DATABASE_URL || !process.env.JWT_SECRET) {
+    return res.status(500).json({ error: 'Server misconfigured' });
+  }
+
   const { email, password, name } = req.body;
 
   if (!email || !password || !name) {
@@ -38,12 +42,25 @@ router.post('/register', async (req, res) => {
     res.status(201).json({ token, user });
   } catch (err) {
     console.error('register error:', err);
+    if (err.code === 'CONFIG') {
+      return res.status(500).json({ error: 'Server misconfigured' });
+    }
+    if (err.code === '42P01') {
+      return res.status(500).json({ error: 'Database not migrated' });
+    }
+    if (['ECONNREFUSED', 'ETIMEDOUT', 'ENOTFOUND'].includes(err.code)) {
+      return res.status(500).json({ error: 'Database connection failed' });
+    }
     res.status(500).json({ error: 'Internal server error' });
   }
 });
 
 // POST /api/v1/auth/login
 router.post('/login', async (req, res) => {
+  if (!process.env.DATABASE_URL || !process.env.JWT_SECRET) {
+    return res.status(500).json({ error: 'Server misconfigured' });
+  }
+
   const { email, password } = req.body;
 
   if (!email || !password) {
@@ -74,6 +91,15 @@ router.post('/login', async (req, res) => {
     res.json({ token, user: safeUser });
   } catch (err) {
     console.error('login error:', err);
+    if (err.code === 'CONFIG') {
+      return res.status(500).json({ error: 'Server misconfigured' });
+    }
+    if (err.code === '42P01') {
+      return res.status(500).json({ error: 'Database not migrated' });
+    }
+    if (['ECONNREFUSED', 'ETIMEDOUT', 'ENOTFOUND'].includes(err.code)) {
+      return res.status(500).json({ error: 'Database connection failed' });
+    }
     res.status(500).json({ error: 'Internal server error' });
   }
 });

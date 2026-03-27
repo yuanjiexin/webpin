@@ -4,6 +4,11 @@ const path = require('path');
 const { pool } = require('./db');
 
 async function migrate() {
+  if (!pool) {
+    console.error('Migration failed: DATABASE_URL is not set');
+    process.exit(1);
+  }
+
   const sqlFile = path.join(__dirname, '../migrations/001_initial_schema.sql');
   const sql = fs.readFileSync(sqlFile, 'utf8');
 

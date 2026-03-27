@@ -14,16 +14,23 @@ app.use(cors({ origin: process.env.CORS_ORIGIN || '*', credentials: true }));
 app.use(express.json());
 
 // 健康检查
-app.get('/health', (req, res) => res.json({ status: 'ok' }));
+app.get('/health', async (req, res) => {
+  const config = {
+    database: !!process.env.DATABASE_URL,
+    jwt: !!process.env.JWT_SECRET,
+  };
 
-// 数据库连接测试（临时调试用）
-app.get('/db-test', async (req, res) => {
-  try {
-    const result = await db.query('SELECT NOW()');
-    res.json({ ok: true, time: result.rows[0].now });
-  } catch (err) {
-    res.status(500).json({ ok: false, error: err.message });
+  let dbStatus = 'not_configured';
+  if (config.database) {
+    try {
+      await db.query('SELECT 1');
+      dbStatus = 'ok';
+    } catch (e) {
+      dbStatus = 'error';
+    }
   }
+
+  res.json({ status: 'ok', config, db: dbStatus });
 });
 
 // API 路由

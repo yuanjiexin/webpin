@@ -262,6 +262,11 @@
   <div id="view-auth">
     <div id="auth-error" class="error-msg"></div>
 
+    <div class="form-group">
+      <label>后端地址</label>
+      <input type="text" id="api-base-auth" placeholder="https://xxx.netlify.app/api/v1">
+    </div>
+
     <div id="login-form">
       <div class="form-group">
         <label>邮箱</label>
@@ -303,6 +308,9 @@
       </div>
       <button class="logout-btn" id="logout-btn">退出</button>
     </div>
+
+    <div class="section-title">后端地址</div>
+    <input type="text" id="api-base-main" placeholder="https://xxx.netlify.app/api/v1" style="margin-bottom:12px;">
 
     <div class="section-title">当前项目</div>
     <select id="project-select">

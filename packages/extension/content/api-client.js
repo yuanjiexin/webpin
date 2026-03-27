@@ -3,21 +3,23 @@
  * 通过 chrome.storage 读取 token，与后端通信
  */
 
-const API_BASE = 'https://webpin-backend.netlify.app/api/v1';
+const DEFAULT_API_BASE = 'https://webpin-backend.netlify.app/api/v1';
 
 class WebpinApiClient {
   constructor() {
     this._user = null;
     this._token = null;
     this._projectId = null;
+    this._apiBase = DEFAULT_API_BASE;
   }
 
   async init() {
-    const data = await this._storageGet(['token', 'user', 'projectId', 'projectName']);
+    const data = await this._storageGet(['token', 'user', 'projectId', 'projectName', 'apiBase']);
     this._token = data.token || null;
     this._user = data.user || null;
     this._projectId = data.projectId || null;
     this._projectName = data.projectName || '';
+    this._apiBase = normalizeApiBase(data.apiBase) || DEFAULT_API_BASE;
   }
 
   getUser() { return this._user; }
@@ -32,7 +34,7 @@ class WebpinApiClient {
     try {
       const encodedUrl = encodeURIComponent(url);
       const res = await fetch(
-        `${API_BASE}/annotations?projectId=${projectId}&url=${encodedUrl}`,
+        `${this._apiBase}/annotations?projectId=${projectId}&url=${encodedUrl}`,
         { headers: this._headers() }
       );
       if (!res.ok) return null;
@@ -45,7 +47,7 @@ class WebpinApiClient {
 
   async createAnnotation(data) {
     try {
-      const res = await fetch(`${API_BASE}/annotations`, {
+      const res = await fetch(`${this._apiBase}/annotations`, {
         method: 'POST',
         headers: { ...this._headers(), 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...data, projectId: this._projectId }),
@@ -60,7 +62,7 @@ class WebpinApiClient {
 
   async resolveAnnotation(annotationId, resolved) {
     try {
-      const res = await fetch(`${API_BASE}/annotations/${annotationId}/resolve`, {
+      const res = await fetch(`${this._apiBase}/annotations/${annotationId}/resolve`, {
         method: 'PATCH',
         headers: { ...this._headers(), 'Content-Type': 'application/json' },
         body: JSON.stringify({ resolved }),
@@ -75,7 +77,7 @@ class WebpinApiClient {
 
   async createReply(annotationId, content) {
     try {
-      const res = await fetch(`${API_BASE}/annotations/${annotationId}/replies`, {
+      const res = await fetch(`${this._apiBase}/annotations/${annotationId}/replies`, {
         method: 'POST',
         headers: { ...this._headers(), 'Content-Type': 'application/json' },
         body: JSON.stringify({ content }),
@@ -109,6 +111,12 @@ class WebpinApiClient {
       }
     });
   }
+}
+
+function normalizeApiBase(value) {
+  const v = String(value || '').trim();
+  if (!v) return '';
+  return v.endsWith('/') ? v.slice(0, -1) : v;
 }
 
 if (typeof module !== 'undefined' && module.exports) {

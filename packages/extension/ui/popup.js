@@ -1,4 +1,5 @@
-const API_BASE = 'https://webpin-backend.netlify.app/api/v1';
+const DEFAULT_API_BASE = 'https://webpin-backend.netlify.app/api/v1';
+let apiBase = DEFAULT_API_BASE;
 
 // ===== 状态 =====
 let currentUser = null;
@@ -8,10 +9,30 @@ let selectedProjectId = null;
 
 // ===== 初始化 =====
 async function initPopup() {
-  const data = await storageGet(['token', 'user', 'projectId', 'projectName']);
+  const data = await storageGet(['token', 'user', 'projectId', 'projectName', 'apiBase']);
   currentToken = data.token;
   currentUser = data.user;
   selectedProjectId = data.projectId;
+  apiBase = normalizeApiBase(data.apiBase) || DEFAULT_API_BASE;
+
+  const apiBaseAuthInput = document.getElementById('api-base-auth');
+  const apiBaseMainInput = document.getElementById('api-base-main');
+  if (apiBaseAuthInput) apiBaseAuthInput.value = apiBase;
+  if (apiBaseMainInput) apiBaseMainInput.value = apiBase;
+
+  [apiBaseAuthInput, apiBaseMainInput].filter(Boolean).forEach((input) => {
+    input.addEventListener('change', async () => {
+      const next = normalizeApiBase(input.value) || DEFAULT_API_BASE;
+      apiBase = next;
+      if (apiBaseAuthInput) apiBaseAuthInput.value = next;
+      if (apiBaseMainInput) apiBaseMainInput.value = next;
+      await chrome.storage.local.set({ apiBase: next });
+      clearError();
+      if (currentToken && currentUser) {
+        loadProjects();
+      }
+    });
+  });
 
   if (currentToken && currentUser) {
     showMainView();
@@ -60,11 +81,11 @@ document.getElementById('login-btn').addEventListener('click', async () => {
   btn.textContent = '登录中...';
 
   try {
-    const res = await fetch(`${API_BASE}/auth/login`, {
+    const res = await fetch(`${apiBase}/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password }),
-    }).catch(e => { throw new Error('无法连接后端，请确认后端已启动 (http://localhost:3001)'); });
+    }).catch(() => { throw new Error(`无法连接后端，请确认后端可访问：${apiBase}`); });
 
     const data = await res.json();
     if (!res.ok) return showError(data.error || '登录失败');
@@ -90,11 +111,11 @@ document.getElementById('register-btn').addEventListener('click', async () => {
   btn.textContent = '注册中...';
 
   try {
-    const res = await fetch(`${API_BASE}/auth/register`, {
+    const res = await fetch(`${apiBase}/auth/register`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name, email, password }),
-    }).catch(e => { throw new Error('无法连接后端，请确认后端已启动 (http://localhost:3001)'); });
+    }).catch(() => { throw new Error(`无法连接后端，请确认后端可访问：${apiBase}`); });
 
     const data = await res.json();
     if (!res.ok) return showError(data.error || '注册失败');
@@ -120,7 +141,7 @@ document.getElementById('logout-btn').addEventListener('click', async () => {
 // ===== 项目管理 =====
 async function loadProjects() {
   try {
-    const res = await fetch(`${API_BASE}/projects`, {
+    const res = await fetch(`${apiBase}/projects`, {
       headers: { Authorization: `Bearer ${currentToken}` },
     });
     if (!res.ok) return;
@@ -167,7 +188,7 @@ document.getElementById('create-project-btn').addEventListener('click', async ()
   if (!name) return;
 
   try {
-    const res = await fetch(`${API_BASE}/projects`, {
+    const res = await fetch(`${apiBase}/projects`, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${currentToken}`,
@@ -285,6 +306,12 @@ async function saveAuth(token, user) {
 
 function storageGet(keys) {
   return new Promise((resolve) => chrome.storage.local.get(keys, resolve));
+}
+
+function normalizeApiBase(value) {
+  const v = String(value || '').trim();
+  if (!v) return '';
+  return v.endsWith('/') ? v.slice(0, -1) : v;
 }
 
 // 启动
