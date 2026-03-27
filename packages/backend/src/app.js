@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 
+const db = require('./db');
 const authRoutes = require('./auth/routes');
 const projectRoutes = require('./projects/routes');
 const annotationRoutes = require('./annotations/routes');
@@ -14,6 +15,16 @@ app.use(express.json());
 
 // 健康检查
 app.get('/health', (req, res) => res.json({ status: 'ok' }));
+
+// 数据库连接测试（临时调试用）
+app.get('/db-test', async (req, res) => {
+  try {
+    const result = await db.query('SELECT NOW()');
+    res.json({ ok: true, time: result.rows[0].now });
+  } catch (err) {
+    res.status(500).json({ ok: false, error: err.message });
+  }
+});
 
 // API 路由
 app.use('/api/v1/auth', authRoutes);
